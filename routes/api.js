@@ -62,14 +62,45 @@ module.exports = function (app) {
           updated_on: new Date().toUTCString(),
         });
         newIssue.save((err, savedIssue) => {
-          if (!err && savedIssue) {
-            console.log(savedIssue);
+          if (err || !savedIssue) {
+            res.send("There was an error saving the issue", err);
+          } else {
+            res.json(savedIssue);
           }
         });
+      }
     })
 
     .put(function (req, res) {
-      let project = req.params.project;
+      let updateValues = {};
+      for (const prop in req.body) {
+        if (req.body[prop] != "") updateValues[prop] = req.body[prop];
+      }
+      if (!updateValues._id || Object.keys(updateValues).length < 2) {
+        res.json({ error: "no update field(s) sent", _id: updateValues._id });
+      } else {
+        updateValues.updated_on = new Date().toUTCString();
+        IssueModel.findByIdAndUpdate(
+          updateValues._id,
+          updateValues,
+          { new: true },
+          (err, updatedIssue) => {
+            if (!err && updatedIssue) {
+              updatedIssue.result = "successfully updated";
+              return res.json({
+                result: "successfully updated",
+                _id: updatedIssue._id,
+              });
+            } else if (!updatedIssue) {
+              return res.json({
+                error: "could not update",
+                _id: updatedIssue._id,
+              });
+            }
+          }
+        );
+      }
+      console.log(updateValues);
     })
 
     .delete(function (req, res) {
