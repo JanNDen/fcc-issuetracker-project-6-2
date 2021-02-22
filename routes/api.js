@@ -34,7 +34,14 @@ module.exports = function (app) {
     .route("/api/issues/:project")
 
     .get(function (req, res) {
-      let project = req.params.project;
+      const searchQuery = { project: req.params.project, ...req.query };
+      IssueModel.find(searchQuery, (err, foundIssues) => {
+        if (err || !foundIssues) {
+          res.send("There was an error searching issues", err);
+        } else {
+          res.json(foundIssues);
+        }
+      });
     })
 
     .post(function (req, res) {
