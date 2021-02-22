@@ -39,6 +39,33 @@ module.exports = function (app) {
 
     .post(function (req, res) {
       let project = req.params.project;
+      const {
+        issue_title,
+        issue_text,
+        created_by,
+        assigned_to,
+        status_text,
+      } = req.body;
+      if (!issue_title || !issue_text || !created_by) {
+        res.json({ error: "required field(s) missing" });
+      } else {
+        // Create the issue
+        const newIssue = new IssueModel({
+          project,
+          issue_title,
+          issue_text,
+          created_by,
+          assigned_to: assigned_to || "",
+          status_text: status_text || "",
+          open: true,
+          created_on: new Date().toUTCString(),
+          updated_on: new Date().toUTCString(),
+        });
+        newIssue.save((err, savedIssue) => {
+          if (!err && savedIssue) {
+            console.log(savedIssue);
+          }
+        });
     })
 
     .put(function (req, res) {
