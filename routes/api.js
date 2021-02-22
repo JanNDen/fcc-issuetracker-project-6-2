@@ -83,7 +83,9 @@ module.exports = function (app) {
       for (const prop in req.body) {
         if (req.body[prop] != "") updateValues[prop] = req.body[prop];
       }
-      if (!updateValues._id || Object.keys(updateValues).length < 2) {
+      if (!updateValues._id) {
+        res.json({ error: "missing _id" });
+      } else if (Object.keys(updateValues).length < 2) {
         res.json({ error: "no update field(s) sent", _id: updateValues._id });
       } else {
         updateValues.updated_on = new Date().toUTCString();
@@ -96,12 +98,12 @@ module.exports = function (app) {
               updatedIssue.result = "successfully updated";
               return res.json({
                 result: "successfully updated",
-                _id: updatedIssue._id,
+                _id: updateValues._id,
               });
             } else if (!updatedIssue) {
               return res.json({
                 error: "could not update",
-                _id: updatedIssue._id,
+                _id: updateValues._id,
               });
             }
           }
