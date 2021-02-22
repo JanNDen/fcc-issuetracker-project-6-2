@@ -72,13 +72,19 @@ module.exports = function (app) {
     })
 
     .put(function (req, res) {
+      console.log("update", req.body);
       let updateValues = {};
       for (const prop in req.body) {
         if (req.body[prop] != "") updateValues[prop] = req.body[prop];
       }
       if (!updateValues._id) {
+        console.log("return update", { error: "missing _id" });
         res.json({ error: "missing _id" });
       } else if (Object.keys(updateValues).length < 2) {
+        console.log("return update", {
+          error: "no update field(s) sent",
+          _id: updateValues._id,
+        });
         res.json({ error: "no update field(s) sent", _id: updateValues._id });
       } else {
         updateValues.updated_on = new Date().toUTCString();
@@ -88,11 +94,19 @@ module.exports = function (app) {
           { new: true },
           (err, updatedIssue) => {
             if (!err && updatedIssue) {
+              console.log("return update", {
+                result: "successfully updated",
+                _id: updateValues._id,
+              });
               return res.json({
                 result: "successfully updated",
                 _id: updateValues._id,
               });
             } else if (!updatedIssue) {
+              console.log("return update", {
+                error: "could not update",
+                _id: updateValues._id,
+              });
               return res.json({
                 error: "could not update",
                 _id: updateValues._id,
@@ -105,14 +119,24 @@ module.exports = function (app) {
     })
 
     .delete(function (req, res) {
+      console.log("delete", req.body);
       if (!req.body._id) {
+        console.log("return", { error: "missing _id" });
         res.json({ error: "missing _id" });
       } else {
-        IssueModel.findByIdAndRemove(req.body._id, (err) => {
-          if (err) {
-            res.json({ error: "could not delete", _id: req.body._id });
+        IssueModel.findByIdAndRemove(req.body._id, (err, deletedIssue) => {
+          if (!err && deletedIssue) {
+            console.log("return", {
+              result: "successfully deleted",
+              _id: deletedIssue._id,
+            });
+            res.json({ result: "successfully deleted", _id: deletedIssue._id });
           } else {
-            res.json({ result: "successfully deleted", _id: req.body._id });
+            console.log("return", {
+              error: "could not delete",
+              _id: req.body._id,
+            });
+            res.json({ error: "could not delete", _id: req.body._id });
           }
         });
       }
