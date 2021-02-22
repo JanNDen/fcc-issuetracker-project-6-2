@@ -22,13 +22,6 @@ const issueSchema = new Schema({
 });
 const IssueModel = mongoose.model("issue", issueSchema);
 
-// Model for projects
-const projectSchema = new Schema({
-  userId: { type: String, required: true },
-  issues: [issueSchema],
-});
-const ProjectModel = mongoose.model("project", projectSchema);
-
 module.exports = function (app) {
   app
     .route("/api/issues/:project")
@@ -37,7 +30,7 @@ module.exports = function (app) {
       const searchQuery = { project: req.params.project, ...req.query };
       IssueModel.find(searchQuery, (err, foundIssues) => {
         if (err || !foundIssues) {
-          res.send("There was an error searching issues", err);
+          res.send("error searching issues");
         } else {
           res.json(foundIssues);
         }
@@ -70,7 +63,7 @@ module.exports = function (app) {
         });
         newIssue.save((err, savedIssue) => {
           if (err || !savedIssue) {
-            res.send("There was an error saving the issue", err);
+            res.send("error saving the issue");
           } else {
             res.json(savedIssue);
           }
@@ -95,7 +88,6 @@ module.exports = function (app) {
           { new: true },
           (err, updatedIssue) => {
             if (!err && updatedIssue) {
-              updatedIssue.result = "successfully updated";
               return res.json({
                 result: "successfully updated",
                 _id: updateValues._id,
@@ -118,7 +110,7 @@ module.exports = function (app) {
       } else {
         IssueModel.findByIdAndRemove(req.body._id, (err) => {
           if (err) {
-            res.json({ result: "could not delete", _id: req.body._id });
+            res.json({ error: "could not delete", _id: req.body._id });
           } else {
             res.json({ result: "successfully deleted", _id: req.body._id });
           }
